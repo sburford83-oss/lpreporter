@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LP Incident Reporter</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600;700&display=swap');
+  :root {
+    --red: #EA1634; --red-light: #fff0f2; --red-mid: #ffd6db;
+    --dark: #111111; --body: #333333; --muted: #888888;
+    --border: #e8e8e8; --bg: #f4f4f4; --white: #ffffff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Barlow', sans-serif; background: var(--bg); color: var(--body); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--red);
+    padding: 0 20px;
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 3px 12px rgba(234,22,52,0.35);
+  }
+  .header-logo {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 12px 0;
+    border-right: 1px solid rgba(255,255,255,0.2);
+    padding-right: 16px;
+    margin-right: 16px;
+  }
+  .logo-tkmaxx {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 26px;
+    color: #fff;
+    letter-spacing: -1px;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+  .logo-sub {
+    font-family: 'Barlow', sans-serif;
+    font-size: 9px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.75);
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+  .header-title {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .header-title-main {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 16px;
+    color: #fff;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+  .header-title-sub {
+    font-size: 10px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.7);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 3px;
+  }
+  .header-badge {
+    margin-left: auto;
+    background: rgba(0,0,0,0.2);
+    color: rgba(255,255,255,0.9);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 5px 10px;
+    border-radius: 4px;
+    align-self: center;
+  }
+
+  .progress-wrap { padding: 14px 20px 0; max-width: 580px; margin: 0 auto; display: none; }
+  .progress-track { height: 6px; background: var(--border); border-radius: 0; overflow: hidden; margin-bottom: 7px; }
+  .progress-fill { height: 100%; background: var(--red); border-radius: 0; transition: width 0.4s cubic-bezier(0.4,0,0.2,1); }
+  .progress-label { font-size: 12px; font-weight: 500; color: var(--muted); }
+  .progress-label strong { color: var(--red); }
+
+  .container { max-width: 580px; margin: 0 auto; padding: 24px 20px 60px; }
+  .step { display: none; }
+  .step.active { display: block; animation: slideUp 0.25s ease; }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  .step-title { font-family: 'Barlow Condensed', sans-serif; font-size: 32px; font-weight: 900; color: var(--dark); letter-spacing: -0.5px; text-transform: uppercase; margin-bottom: 4px; }
+  .step-sub { font-size: 14px; color: var(--muted); margin-bottom: 28px; }
+
+  .label { font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px; font-family: 'Barlow', sans-serif; }
+
+  .chip-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 22px; }
+  .chip-grid.three { grid-template-columns: 1fr 1fr 1fr; }
+  .chip-grid.four { grid-template-columns: 1fr 1fr 1fr 1fr; }
+  .chip-grid.one { grid-template-columns: 1fr; }
+
+  .chip { background: var(--white); border: 1.5px solid var(--border); color: var(--body); padding: 13px 10px; border-radius: 12px; font-family: 'Barlow', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; text-align: center; transition: all 0.15s; line-height: 1.3; user-select: none; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+  .chip:hover { border-color: var(--red); color: var(--red); background: var(--red-light); }
+  .chip.selected { background: var(--red); border-color: var(--red); color: #fff; box-shadow: 0 4px 12px rgba(234,22,52,0.28); font-weight: 800; }
+  .chip .icon { display: block; font-size: 20px; margin-bottom: 5px; }
+  .chip.small { padding: 10px 8px; font-size: 12px; }
+
+  .area-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 22px; }
+  .area-chip { background: var(--white); border: 2px solid var(--border); color: var(--body); padding: 11px 12px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; text-align: left; transition: all 0.15s; user-select: none; }
+  .area-chip:hover { border-color: var(--red); color: var(--red); background: var(--red-light); }
+  .area-chip.selected { background: var(--red-light); border-color: var(--red); color: var(--red); font-weight: 700; }
+
+  .field { margin-bottom: 18px; }
+  input[type="text"], input[type="datetime-local"], textarea {
+    width: 100%; background: var(--white); border: 1.5px solid var(--border); border-radius: 12px;
+    color: var(--dark); font-family: 'Barlow', sans-serif; font-size: 15px; font-weight: 500;
+    padding: 13px 15px; outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04); -webkit-appearance: none;
+  }
+  input:focus, textarea:focus { border-color: var(--red); box-shadow: 0 0 0 3px rgba(234,22,52,0.08); }
+  input::placeholder, textarea::placeholder { color: #c0c0cc; font-weight: 400; }
+  textarea { resize: vertical; min-height: 86px; }
+
+  .conditional { background: #fafafa; border: 1.5px solid var(--border); border-radius: 14px; padding: 16px; margin-bottom: 22px; }
+  .conditional .label { margin-bottom: 10px; }
+  .sub-conditional { background: var(--white); border: 1.5px solid var(--border); border-radius: 10px; padding: 14px; margin-top: 14px; }
+
+  .divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+  .nav { display: flex; gap: 10px; margin-top: 30px; }
+  .btn { flex: 1; padding: 15px; border-radius: 12px; border: none; font-family: 'Barlow', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.15s; }
+  .btn-primary { background: var(--red); color: #fff; box-shadow: 0 4px 14px rgba(234,22,52,0.28); border-radius: 8px; }
+  .btn-primary:hover { background: #c8102a; }
+  .btn-back { flex: 0 0 52px; background: var(--white); color: var(--muted); border: 1.5px solid var(--border); font-size: 18px; border-radius: 8px; }
+  .btn-back:hover { color: var(--dark); }
+
+  .review-card { background: var(--white); border: 2px solid var(--border); border-radius: 8px; padding: 13px 15px; margin-bottom: 8px; border-left: 4px solid var(--red); }
+  .rc-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: var(--red); margin-bottom: 3px; }
+  .rc-value { font-size: 14px; font-weight: 600; color: var(--dark); line-height: 1.4; }
+  .rc-value.empty { color: var(--muted); font-weight: 400; font-style: italic; }
+
+  .success-wrap { text-align: center; padding: 16px 0; }
+  .success-icon { width: 72px; height: 72px; background: #e8faf3; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto 18px; animation: pop 0.45s cubic-bezier(0.36,0.07,0.19,0.97); }
+  @keyframes pop { 0% { transform: scale(0); } 70% { transform: scale(1.15); } 100% { transform: scale(1); } }
+  .success-wrap h2 { font-family: 'Barlow Condensed', sans-serif; font-size: 36px; font-weight: 900; color: var(--dark); text-transform: uppercase; letter-spacing: -0.5px; margin-bottom: 5px; }
+  .success-wrap p { color: var(--muted); font-size: 14px; margin-bottom: 20px; }
+  .ref-pill { display: inline-block; background: var(--red); color: #fff; font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; padding: 10px 24px; border-radius: 6px; margin-bottom: 22px; box-shadow: 0 4px 14px rgba(234,22,52,0.28); }
+  .copy-box { background: var(--white); border: 1.5px solid var(--border); border-radius: 14px; padding: 16px; text-align: left; font-size: 13px; line-height: 1.9; color: var(--body); white-space: pre-wrap; margin-bottom: 14px; max-height: 260px; overflow-y: auto; }
+  .btn-full { width: 100%; padding: 15px; border-radius: 12px; border: none; font-family: 'Barlow', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; margin-bottom: 10px; transition: all 0.15s; }
+  .btn-copy { background: var(--red); color: #fff; box-shadow: 0 4px 14px rgba(234,22,52,0.28); }
+  .btn-new { background: var(--white); color: var(--muted); border: 1.5px solid var(--border); }
+  .btn-new:hover { color: var(--dark); }
+  .btn-whatsapp { background: #25D366; color: #fff; box-shadow: 0 4px 14px rgba(37,211,102,0.3); }
+  .btn-whatsapp:hover { background: #1ebe5d; }
+  .share-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+
+  .info-banner { background: #fff8e1; border: 1.5px solid #ffe082; border-radius: 10px; padding: 11px 14px; font-size: 13px; color: #7a6000; font-weight: 500; margin-bottom: 18px; }
+
+
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-logo">
+    <div class="logo-tkmaxx">TK Maxx</div>
+    <div class="logo-sub">Loss Prevention</div>
+  </div>
+  <div class="header-title">
+    <div class="header-title-main">Incident Reporter</div>
+    <div class="header-title-sub">Store 356 — Valegate</div>
+  </div>
+  <div class="header-badge">🔒 LP</div>
+</header>
+
+<div class="progress-wrap" id="progress_wrap">
+  <div class="progress-track"><div class="progress-fill" id="progress_fill"></div></div>
+  <div class="progress-label" id="progress_label"></div>
+</div>
+
+<div class="container">
+
+  <!-- STEP 1: Reporter -->
+  <div class="step active" id="step1">
+    <div class="step-title">Who's reporting?</div>
+    <div class="step-sub">Your details and when this happened</div>
+    <div class="label">Your position</div>
+    <div class="chip-grid three">
+      <div class="chip" onclick="selectChip(this,'reporter_position','Management')"><span class="icon">👔</span>Management</div>
+      <div class="chip" onclick="selectChip(this,'reporter_position','Loss Prevention')"><span class="icon">🔒</span>Loss Prevention</div>
+      <div class="chip" onclick="selectChip(this,'reporter_position','Security Guard')"><span class="icon">🛡️</span>Security</div>
+    </div>
+    <div class="field"><div class="label">Your name</div><input type="text" id="reporter_name" placeholder="e.g. Simon Jones"></div>
+    <div class="field"><div class="label">Store</div><input type="text" id="store_name" value="TK Maxx Cardiff Valegate 356"></div>
+    <div class="field"><div class="label">Date & time of incident</div><input type="datetime-local" id="incident_datetime"></div>
+    <div class="nav"><button class="btn btn-primary" onclick="goNext(1)">Continue →</button></div>
+  </div>
+
+  <!-- STEP 2: Incident Type -->
+  <div class="step" id="step2">
+    <div class="step-title">What happened?</div>
+    <div class="step-sub">Select the incident type — choose all that apply</div>
+    <div class="label">Incident category</div>
+    <div class="chip-grid three">
+      <div class="chip" onclick="toggleChip(this,'incident_types','Crime')"><span class="icon">🚨</span>Crime</div>
+      <div class="chip" onclick="toggleChip(this,'incident_types','Violence & Aggression')"><span class="icon">⚠️</span>Violence & Aggression</div>
+      <div class="chip" onclick="toggleChip(this,'incident_types','Accident')"><span class="icon">🩺</span>Accident</div>
+    </div>
+
+    <!-- CRIME -->
+    <div id="crime_section" style="display:none">
+      <div class="conditional">
+        <div class="label">Crime type</div>
+        <div class="chip-grid three">
+          <div class="chip" onclick="selectChip(this,'crime_type','Theft')"><span class="icon">🛍️</span>Theft</div>
+          <div class="chip" onclick="selectChip(this,'crime_type','Criminal Damage')"><span class="icon">💥</span>Damage</div>
+          <div class="chip" onclick="selectChip(this,'crime_type','Fraud')"><span class="icon">💳</span>Fraud</div>
+        </div>
+        <div id="theft_section" style="display:none">
+          <div class="divider"></div>
+          <div class="label">Theft type</div>
+          <div class="chip-grid three">
+            <div class="chip small" onclick="selectChip(this,'theft_type','Shoplifting')">🛒 Shoplifting</div>
+            <div class="chip small" onclick="selectChip(this,'theft_type','Ticket Switch Deter')">🏷️ Ticket Switch</div>
+            <div class="chip small" onclick="selectChip(this,'theft_type','Theft from Person')">👜 From Person</div>
+            <div class="chip small" onclick="selectChip(this,'theft_type','Till Snatch')">💰 Till Snatch</div>
+            <div class="chip small" onclick="selectChip(this,'theft_type','Robbery')">⚡ Robbery</div>
+            <div class="chip small" onclick="selectChip(this,'theft_type','Theft of Non Merch')">🔧 Non Merch</div>
+          </div>
+          <div class="label">Related to a delivery?</div>
+          <div class="chip-grid" style="margin-bottom:14px">
+            <div class="chip" onclick="selectChip(this,'delivery_related','Yes')">✅ Yes</div>
+            <div class="chip" onclick="selectChip(this,'delivery_related','No')">❌ No</div>
+          </div>
+          <div class="label">TJX associate / contractor dishonesty suspected?</div>
+          <div class="chip-grid" style="margin-bottom:0">
+            <div class="chip" onclick="selectChip(this,'associate_dishonesty','Yes')">⚠️ Yes</div>
+            <div class="chip" onclick="selectChip(this,'associate_dishonesty','No')">✅ No</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIOLENCE & AGGRESSION -->
+    <div id="va_section" style="display:none">
+      <div class="conditional">
+        <div class="info-banner">⚠️ If several types occurred in the same incident, log the most impactful first.</div>
+        <div class="label">Type of Violence & Aggression (select all that apply)</div>
+        <div class="chip-grid" style="grid-template-columns:1fr 1fr;margin-bottom:16px">
+          <div class="chip" onclick="toggleChip(this,'va_types','Verbal Abuse')">🗣️ Verbal Abuse</div>
+          <div class="chip" onclick="toggleChip(this,'va_types','Threats')">⚡ Threats</div>
+          <div class="chip" onclick="toggleChip(this,'va_types','Harassment or Inappropriate Behaviour')">😡 Harassment</div>
+          <div class="chip" onclick="toggleChip(this,'va_types','Physical Assault')">👊 Physical Assault</div>
+        </div>
+
+        <!-- Verbal Abuse sub -->
+        <div id="va_verbal_section" style="display:none">
+          <div class="sub-conditional">
+            <div class="label">Type of Verbal Abuse</div>
+            <div class="chip-grid" style="margin-bottom:0">
+              <div class="chip small" onclick="selectChip(this,'verbal_abuse_type','Swearing/Insults')">🤬 Swearing/Insults</div>
+              <div class="chip small" onclick="selectChip(this,'verbal_abuse_type','Offensive Language')">💬 Offensive Language</div>
+              <div class="chip small" onclick="selectChip(this,'verbal_abuse_type','Name-calling')">🏷️ Name-calling</div>
+              <div class="chip small" onclick="selectChip(this,'verbal_abuse_type','Other Verbal Abuse')">❓ Other</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Threats sub -->
+        <div id="va_threats_section" style="display:none">
+          <div class="sub-conditional">
+            <div class="label">Type of Threat (select all that apply)</div>
+            <div class="chip-grid" style="margin-bottom:0">
+              <div class="chip small" onclick="toggleChip(this,'threat_types','Threat of Physical Violence')">👊 Physical Violence</div>
+              <div class="chip small" onclick="toggleChip(this,'threat_types','Threat to Infect/Spitting')">🦠 Infect/Spitting</div>
+              <div class="chip small" onclick="toggleChip(this,'threat_types','Threat of Using a Weapon')">🔪 Using a Weapon</div>
+              <div class="chip small" onclick="toggleChip(this,'threat_types','Other Threat')">❓ Other Threat</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Harassment sub -->
+        <div id="va_harassment_section" style="display:none">
+          <div class="sub-conditional">
+            <div class="label">Type of Harassment or Inappropriate Behaviour</div>
+            <div class="chip-grid" style="margin-bottom:0">
+              <div class="chip small" onclick="selectChip(this,'harassment_type','Unwanted Contact (Phone/Text)')">📱 Unwanted Contact</div>
+              <div class="chip small" onclick="selectChip(this,'harassment_type','Harassment')">😠 Harassment</div>
+              <div class="chip small" onclick="selectChip(this,'harassment_type','Sexual Harassment')">⚠️ Sexual Harassment</div>
+              <div class="chip small" onclick="selectChip(this,'harassment_type','Stalking')">👁️ Stalking</div>
+              <div class="chip small" onclick="selectChip(this,'harassment_type','Online/Cyber Stalking or Defamation')">💻 Online/Cyber</div>
+              <div class="chip small" onclick="selectChip(this,'harassment_type','Indecent Exposure')">🚫 Indecent Exposure</div>
+              <div class="chip small" onclick="selectChip(this,'harassment_type','Inappropriate Conduct')">❌ Inappropriate Conduct</div>
+              <div class="chip small" onclick="selectChip(this,'harassment_type','Other')">❓ Other</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Physical Assault sub -->
+        <div id="va_physical_section" style="display:none">
+          <div class="sub-conditional">
+            <div class="label">Type of Physical Assault</div>
+            <div class="chip-grid three" style="margin-bottom:0">
+              <div class="chip small" onclick="selectChip(this,'physical_assault_type','Pushing')">🤚 Pushing</div>
+              <div class="chip small" onclick="selectChip(this,'physical_assault_type','Punching')">👊 Punching</div>
+              <div class="chip small" onclick="selectChip(this,'physical_assault_type','Slapping')">✋ Slapping</div>
+              <div class="chip small" onclick="selectChip(this,'physical_assault_type','Hitting with Objects')">🪵 Hitting w/ Objects</div>
+              <div class="chip small" onclick="selectChip(this,'physical_assault_type','Spitting')">🦠 Spitting</div>
+              <div class="chip small" onclick="selectChip(this,'physical_assault_type','Biting')">😬 Biting</div>
+              <div class="chip small" onclick="selectChip(this,'physical_assault_type','Sexual Assault')">⚠️ Sexual Assault</div>
+              <div class="chip small" onclick="selectChip(this,'physical_assault_type','Stabbing')">🔪 Stabbing</div>
+              <div class="chip small" onclick="selectChip(this,'physical_assault_type','Other Unwanted Physical Contact')">❓ Other</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Characteristics -->
+        <div class="label">Did this involve mention of any characteristics? (select all that apply)</div>
+        <div class="area-grid" style="margin-bottom:14px">
+          <div class="area-chip" onclick="toggleArea(this,'No Discrimination')">✅ No Discrimination</div>
+          <div class="area-chip" onclick="toggleArea(this,'Age')">🎂 Age</div>
+          <div class="area-chip" onclick="toggleArea(this,'Disability / Chronic Diseases')">♿ Disability/Chronic</div>
+          <div class="area-chip" onclick="toggleArea(this,'Gender Reassignment')">🏳️ Gender Reassignment</div>
+          <div class="area-chip" onclick="toggleArea(this,'Marriage or Civil Partnership Status')">💍 Marriage/Civil Partnership</div>
+          <div class="area-chip" onclick="toggleArea(this,'Pregnancy or Maternity')">🤱 Pregnancy/Maternity</div>
+          <div class="area-chip" onclick="toggleArea(this,'Race / Ethnic Origin')">🌍 Race/Ethnic Origin</div>
+          <div class="area-chip" onclick="toggleArea(this,'Religion or Belief')">🕌 Religion or Belief</div>
+          <div class="area-chip" onclick="toggleArea(this,'Sex / Gender')">⚧️ Sex/Gender</div>
+          <div class="area-chip" onclick="toggleArea(this,'Sexual Orientation / Identity')">🏳️‍🌈 Sexual Orientation</div>
+          <div class="area-chip" onclick="toggleArea(this,'Addiction')">💊 Addiction</div>
+        </div>
+
+        <!-- Who committed -->
+        <div class="label">Who committed the incident?</div>
+        <div class="chip-grid three" style="margin-bottom:14px">
+          <div class="chip small" onclick="selectChip(this,'va_perpetrator','Customer')">🛒 Customer</div>
+          <div class="chip small" onclick="selectChip(this,'va_perpetrator','Youth(s)')">👦 Youth(s)</div>
+          <div class="chip small" onclick="selectChip(this,'va_perpetrator','Associate')">👤 Associate</div>
+          <div class="chip small" onclick="selectChip(this,'va_perpetrator','Management')">👔 Management</div>
+          <div class="chip small" onclick="selectChip(this,'va_perpetrator','Loss Prevention')">🔒 Loss Prevention</div>
+          <div class="chip small" onclick="selectChip(this,'va_perpetrator','Third-Party')">🤝 Third-Party</div>
+          <div class="chip small" onclick="selectChip(this,'va_perpetrator','Other')">❓ Other</div>
+        </div>
+
+        <!-- Known offender -->
+        <div class="label">Known offender?</div>
+        <div class="chip-grid" style="margin-bottom:14px">
+          <div class="chip" onclick="selectChip(this,'va_known_offender','Yes')">⚠️ Yes</div>
+          <div class="chip" onclick="selectChip(this,'va_known_offender','No')">✅ No</div>
+        </div>
+
+        <!-- Targeted towards -->
+        <div class="label">Who was the incident targeted towards?</div>
+        <div class="chip-grid three" style="margin-bottom:0">
+          <div class="chip small" onclick="selectChip(this,'va_target','Customer')">🛒 Customer</div>
+          <div class="chip small" onclick="selectChip(this,'va_target','Associate')">👤 Associate</div>
+          <div class="chip small" onclick="selectChip(this,'va_target','Management')">👔 Management</div>
+          <div class="chip small" onclick="selectChip(this,'va_target','Loss Prevention')">🔒 Loss Prevention</div>
+          <div class="chip small" onclick="selectChip(this,'va_target','Loss Prevention Management')">🔒 LP Management</div>
+          <div class="chip small" onclick="selectChip(this,'va_target','Third-Party')">🤝 Third-Party</div>
+          <div class="chip small" onclick="selectChip(this,'va_target','Other')">❓ Other</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav">
+      <button class="btn btn-back" onclick="goBack(2)">←</button>
+      <button class="btn btn-primary" onclick="goNext(2)">Continue →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: Area of Store -->
+  <div class="step" id="step3">
+    <div class="step-title">Where in store?</div>
+    <div class="step-sub">Select all areas involved</div>
+    <div class="area-grid">
+      <div class="area-chip" onclick="toggleArea(this,'Accessories')">👜 Accessories</div>
+      <div class="area-chip" onclick="toggleArea(this,'Beauty')">💄 Beauty</div>
+      <div class="area-chip" onclick="toggleArea(this,'Jewellery Counter')">💍 Jewellery Counter</div>
+      <div class="area-chip" onclick="toggleArea(this,'Womens Apparel')">👗 Women's Apparel</div>
+      <div class="area-chip" onclick="toggleArea(this,'Mens Apparel')">👔 Men's Apparel</div>
+      <div class="area-chip" onclick="toggleArea(this,'Kids & Toys')">🧸 Kids & Toys</div>
+      <div class="area-chip" onclick="toggleArea(this,'Mens Shoes')">👟 Men's Shoes</div>
+      <div class="area-chip" onclick="toggleArea(this,'Home')">🏠 Home</div>
+      <div class="area-chip" onclick="toggleArea(this,'Mens Fitting Room')">🚪 Men's Fitting Room</div>
+      <div class="area-chip" onclick="toggleArea(this,'Womens Fitting Room')">🚪 Women's Fitting Room</div>
+      <div class="area-chip" onclick="toggleArea(this,'Frontline')">🏪 Frontline</div>
+      <div class="area-chip" onclick="toggleArea(this,'External')">🌍 External</div>
+    </div>
+    <div class="nav">
+      <button class="btn btn-back" onclick="goBack(3)">←</button>
+      <button class="btn btn-primary" onclick="goNext(3)">Continue →</button>
+    </div>
+  </div>
+
+  <!-- STEP 4: Suspect Details -->
+  <div class="step" id="step4">
+    <div class="step-title">Suspect details</div>
+    <div class="step-sub">As much as you know</div>
+    <div class="label">Number of suspects</div>
+    <div class="chip-grid three">
+      <div class="chip" onclick="selectChip(this,'suspect_count','1')">1</div>
+      <div class="chip" onclick="selectChip(this,'suspect_count','2')">2</div>
+      <div class="chip" onclick="selectChip(this,'suspect_count','3+')">3+</div>
+    </div>
+    <div class="label">Known to store?</div>
+    <div class="chip-grid" style="margin-bottom:20px">
+      <div class="chip" onclick="selectChip(this,'known_offender','Yes — Known Offender')">⚠️ Known offender</div>
+      <div class="chip" onclick="selectChip(this,'known_offender','No')">Unknown</div>
+    </div>
+    <div class="field"><div class="label">Suspect description</div><textarea id="suspect_desc" placeholder="Appearance, clothing, age, distinguishing features..." oninput="data.suspect_desc=this.value"></textarea></div>
+    <div class="field"><div class="label">Goods / items involved</div><textarea id="goods_desc" placeholder="What was taken or attempted? Estimated value?" oninput="data.goods_desc=this.value"></textarea></div>
+    <div class="nav">
+      <button class="btn btn-back" onclick="goBack(4)">←</button>
+      <button class="btn btn-primary" onclick="goNext(4)">Continue →</button>
+    </div>
+  </div>
+
+  <!-- STEP 5: Outcome -->
+  <div class="step" id="step5">
+    <div class="step-title">Outcome</div>
+    <div class="step-sub">What was the result?</div>
+    <div class="label">Outcome</div>
+    <div class="chip-grid">
+      <div class="chip" onclick="selectChip(this,'outcome','Deterred — Nothing Taken')">✅ Deterred</div>
+      <div class="chip" onclick="selectChip(this,'outcome','Goods Recovered')">📦 Goods Recovered</div>
+      <div class="chip" onclick="selectChip(this,'outcome','Goods Not Recovered')">❌ Not Recovered</div>
+      <div class="chip" onclick="selectChip(this,'outcome','Police Called')">🚔 Police Called</div>
+      <div class="chip" onclick="selectChip(this,'outcome','Arrest Made')">🔒 Arrest Made</div>
+      <div class="chip" onclick="selectChip(this,'outcome','Banned from Store')">🚫 Banned</div>
+    </div>
+    <div class="field"><div class="label">Police reference (if applicable)</div><input type="text" id="police_ref" placeholder="e.g. CRI-12345678" oninput="data.police_ref=this.value"></div>
+    <div class="field"><div class="label">Additional notes</div><textarea id="notes" placeholder="CCTV available? Witnesses? Any other context..." oninput="data.notes=this.value"></textarea></div>
+    <div class="nav">
+      <button class="btn btn-back" onclick="goBack(5)">←</button>
+      <button class="btn btn-primary" onclick="goNext(5)">Review →</button>
+    </div>
+  </div>
+
+  <!-- STEP 6: Review -->
+  <div class="step" id="step6">
+    <div class="step-title">Review & submit</div>
+    <div class="step-sub">Check everything looks right</div>
+    <div id="review_cards"></div>
+    <div class="nav">
+      <button class="btn btn-back" onclick="goBack(6)">←</button>
+      <button class="btn btn-primary" onclick="submitIncident()">Submit Incident ✓</button>
+    </div>
+  </div>
+
+  <!-- SUCCESS -->
+  <div class="step" id="step7">
+    <div class="success-wrap">
+      <div class="success-icon">✅</div>
+      <h2>Incident Logged</h2>
+      <p>Copy the summary or email it directly.</p>
+      <div class="ref-pill" id="ref_number">LP----</div>
+      <div class="copy-box" id="copy_text"></div>
+      <button class="btn-full btn-copy" onclick="copySummary()">📋 Copy Summary</button>
+      <button class="btn-full btn-new" onclick="resetForm()">+ New Incident</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const TOTAL = 6;
+  const pad = n => String(n).padStart(2,'0');
+  const now = new Date();
+  const dtDefault = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  document.getElementById('incident_datetime').value = dtDefault;
+
+  let data = {
+    reporter_position:'', reporter_name:'', store_name:'TK Maxx Cardiff Valegate 356',
+    incident_datetime: dtDefault, incident_types:[], crime_type:'', theft_type:'',
+    delivery_related:'', associate_dishonesty:'',
+    va_types:[], verbal_abuse_type:'', threat_types:[], harassment_type:'',
+    physical_assault_type:'', characteristics:[], va_perpetrator:'',
+    va_known_offender:'', va_target:'',
+    areas:[], suspect_count:'', suspect_desc:'', known_offender:'', goods_desc:'',
+    outcome:'', police_ref:'', notes:''
+  };
+
+  function updateProgress(step) {
+    const wrap = document.getElementById('progress_wrap');
+    wrap.style.display = (step >= 1 && step <= TOTAL) ? 'block' : 'none';
+    document.getElementById('progress_fill').style.width = ((step / TOTAL) * 100) + '%';
+    document.getElementById('progress_label').innerHTML = `Step <strong>${step}</strong> of ${TOTAL}`;
+  }
+
+  function showStep(n) {
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+    document.getElementById('step' + n).classList.add('active');
+    updateProgress(n <= TOTAL ? n : 0);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function selectChip(el, field, value) {
+    const parent = el.closest('.chip-grid, .toggle-row');
+    if (parent) parent.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    data[field] = value;
+    if (field === 'crime_type') {
+      document.getElementById('theft_section').style.display = value === 'Theft' ? 'block' : 'none';
+    }
+  }
+
+  function toggleChip(el, field, value) {
+    el.classList.toggle('selected');
+    if (!Array.isArray(data[field])) data[field] = [];
+    if (el.classList.contains('selected')) {
+      if (!data[field].includes(value)) data[field].push(value);
+    } else {
+      data[field] = data[field].filter(v => v !== value);
+    }
+    // Main incident type toggles
+    if (field === 'incident_types') {
+      document.getElementById('crime_section').style.display = data.incident_types.includes('Crime') ? 'block' : 'none';
+      document.getElementById('va_section').style.display = data.incident_types.includes('Violence & Aggression') ? 'block' : 'none';
+    }
+    // V&A sub-type toggles
+    if (field === 'va_types') {
+      document.getElementById('va_verbal_section').style.display = data.va_types.includes('Verbal Abuse') ? 'block' : 'none';
+      document.getElementById('va_threats_section').style.display = data.va_types.includes('Threats') ? 'block' : 'none';
+      document.getElementById('va_harassment_section').style.display = data.va_types.includes('Harassment or Inappropriate Behaviour') ? 'block' : 'none';
+      document.getElementById('va_physical_section').style.display = data.va_types.includes('Physical Assault') ? 'block' : 'none';
+    }
+  }
+
+  function toggleArea(el, value) {
+    el.classList.toggle('selected');
+    // characteristics and areas share this function — route by context
+    const inConditional = el.closest('#va_section');
+    if (inConditional) {
+      if (!Array.isArray(data.characteristics)) data.characteristics = [];
+      if (el.classList.contains('selected')) {
+        data.characteristics.push(value);
+      } else {
+        data.characteristics = data.characteristics.filter(v => v !== value);
+      }
+    } else {
+      if (!Array.isArray(data.areas)) data.areas = [];
+      if (el.classList.contains('selected')) {
+        data.areas.push(value);
+      } else {
+        data.areas = data.areas.filter(v => v !== value);
+      }
+    }
+  }
+
+  function goNext(step) {
+    if (step === 1) {
+      if (!data.reporter_position) { alert('Please select your position.'); return; }
+      data.reporter_name = document.getElementById('reporter_name').value.trim();
+      if (!data.reporter_name) { alert('Please enter your name.'); return; }
+      data.store_name = document.getElementById('store_name').value;
+      data.incident_datetime = document.getElementById('incident_datetime').value;
+    }
+    if (step === 2 && data.incident_types.length === 0) {
+      alert('Please select at least one incident type.'); return;
+    }
+    if (step === TOTAL) buildReview();
+    showStep(step + 1);
+  }
+
+  function goBack(step) { showStep(step - 1); }
+
+  function fmt(val) {
+    if (!val || (Array.isArray(val) && val.length === 0)) return null;
+    return Array.isArray(val) ? val.join(', ') : val;
+  }
+
+  function buildReview() {
+    data.suspect_desc = document.getElementById('suspect_desc').value;
+    data.goods_desc = document.getElementById('goods_desc').value;
+    data.police_ref = document.getElementById('police_ref').value;
+    data.notes = document.getElementById('notes').value;
+
+    const dt = data.incident_datetime
+      ? new Date(data.incident_datetime).toLocaleString('en-GB', { dateStyle:'medium', timeStyle:'short' }) : null;
+
+    const rows = [
+      ['Reporter', `${data.reporter_name} (${data.reporter_position})`],
+      ['Store', data.store_name],
+      ['Date & Time', dt],
+      ['Incident Type', fmt(data.incident_types)],
+      // Crime
+      ['Crime Type', fmt(data.crime_type)],
+      ['Theft Type', fmt(data.theft_type)],
+      ['Delivery Related', fmt(data.delivery_related)],
+      ['Associate Dishonesty', fmt(data.associate_dishonesty)],
+      // V&A
+      ['V&A Types', fmt(data.va_types)],
+      ['Verbal Abuse Type', fmt(data.verbal_abuse_type)],
+      ['Threat Types', fmt(data.threat_types)],
+      ['Harassment Type', fmt(data.harassment_type)],
+      ['Physical Assault Type', fmt(data.physical_assault_type)],
+      ['Characteristics', fmt(data.characteristics)],
+      ['Perpetrator', fmt(data.va_perpetrator)],
+      ['Known Offender (V&A)', fmt(data.va_known_offender)],
+      ['Targeted Towards', fmt(data.va_target)],
+      // Store
+      ['Area(s) of Store', fmt(data.areas)],
+      ['Suspects', data.suspect_count || null],
+      ['Known Offender', fmt(data.known_offender)],
+      ['Description', fmt(data.suspect_desc)],
+      ['Goods / Items', fmt(data.goods_desc)],
+      ['Outcome', fmt(data.outcome)],
+      ['Police Ref', fmt(data.police_ref)],
+      ['Notes', fmt(data.notes)],
+    ];
+
+    document.getElementById('review_cards').innerHTML = rows
+      .filter(([, val]) => val) // only show fields with data
+      .map(([label, val]) => `
+        <div class="review-card">
+          <div class="rc-label">${label}</div>
+          <div class="rc-value">${val}</div>
+        </div>
+      `).join('');
+  }
+
+  function submitIncident() {
+    // Always read text fields fresh at submit
+    data.suspect_desc = document.getElementById('suspect_desc').value;
+    data.goods_desc = document.getElementById('goods_desc').value;
+    data.police_ref = document.getElementById('police_ref').value;
+    data.notes = document.getElementById('notes').value;
+
+    const d = new Date();
+    const ref = 'LP-' + d.getFullYear().toString().slice(2) + pad(d.getMonth()+1) + pad(d.getDate()) + '-' + Math.floor(Math.random()*9000+1000);
+    document.getElementById('ref_number').textContent = ref;
+    const dt = data.incident_datetime
+      ? new Date(data.incident_datetime).toLocaleString('en-GB', { dateStyle:'medium', timeStyle:'short' }) : 'Not recorded';
+
+    const lines = [
+      `🔒 LP INCIDENT — ${ref}`,
+      `━━━━━━━━━━━━━━━━━━━━━`,
+      `📍 ${data.store_name}`,
+      `📅 ${dt}`,
+      `👤 ${data.reporter_name} (${data.reporter_position})`,
+      ``,
+      `🚨 Type: ${data.incident_types.join(', ') || '—'}`,
+    ];
+
+    if (data.incident_types.includes('Crime')) {
+      lines.push(`🏷️ Crime: ${data.crime_type || '—'}`);
+      if (data.crime_type === 'Theft') {
+        lines.push(`🛒 Theft: ${data.theft_type || '—'}`);
+        lines.push(`📦 Delivery Related: ${data.delivery_related || '—'}`);
+        lines.push(`⚠️ Assoc. Dishonesty: ${data.associate_dishonesty || '—'}`);
+      }
+    }
+
+    if (data.incident_types.includes('Violence & Aggression')) {
+      lines.push(``);
+      lines.push(`⚠️ V&A Type: ${data.va_types.join(', ') || '—'}`);
+      if (data.verbal_abuse_type) lines.push(`🗣️ Verbal Abuse: ${data.verbal_abuse_type}`);
+      if (data.threat_types && data.threat_types.length) lines.push(`⚡ Threats: ${data.threat_types.join(', ')}`);
+      if (data.harassment_type) lines.push(`😡 Harassment: ${data.harassment_type}`);
+      if (data.physical_assault_type) lines.push(`👊 Physical: ${data.physical_assault_type}`);
+      if (data.characteristics && data.characteristics.length) lines.push(`📋 Characteristics: ${data.characteristics.join(', ')}`);
+      lines.push(`👤 Perpetrator: ${data.va_perpetrator || '—'}`);
+      lines.push(`⚠️ Known Offender: ${data.va_known_offender || '—'}`);
+      lines.push(`🎯 Targeted Towards: ${data.va_target || '—'}`);
+    }
+
+    lines.push(``);
+    lines.push(`🏪 Area: ${data.areas.join(', ') || '—'}`);
+    lines.push(`👥 Suspects: ${data.suspect_count || '—'} | Known: ${data.known_offender || '—'}`);
+    if (data.suspect_desc) lines.push(`📝 ${data.suspect_desc}`);
+    if (data.goods_desc) lines.push(`💰 Goods: ${data.goods_desc}`);
+    lines.push(``);
+    lines.push(`✅ Outcome: ${data.outcome || '—'}`);
+    lines.push(`🚔 Police Ref: ${data.police_ref || 'N/A'}`);
+    if (data.notes) lines.push(`💬 ${data.notes}`);
+    lines.push(`━━━━━━━━━━━━━━━━━━━━━`);
+
+    document.getElementById('copy_text').textContent = lines.join('\n');
+    showStep(7);
+  }
+
+  function copySummary() {
+    const text = document.getElementById('copy_text').textContent;
+    const btn = document.querySelector('.btn-copy');
+    // Try modern clipboard API first
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = '✓ Copied!';
+        setTimeout(() => btn.textContent = '📋 Copy Summary', 2500);
+      }).catch(() => fallbackCopy(text, btn));
+    } else {
+      fallbackCopy(text, btn);
+    }
+  }
+
+  function fallbackCopy(text, btn) {
+    // Create a temporary textarea, select it, copy
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    try {
+      document.execCommand('copy');
+      btn.textContent = '✓ Copied!';
+      setTimeout(() => btn.textContent = '📋 Copy Summary', 2500);
+    } catch (e) {
+      btn.textContent = '⚠️ Select text above to copy';
+      setTimeout(() => btn.textContent = '📋 Copy Summary', 3000);
+    }
+    document.body.removeChild(ta);
+  }
+
+  function resetForm() {
+    data = {
+      reporter_position:'', reporter_name:'', store_name:'TK Maxx Cardiff Valegate 356',
+      incident_datetime: dtDefault, incident_types:[], crime_type:'', theft_type:'',
+      delivery_related:'', associate_dishonesty:'',
+      va_types:[], verbal_abuse_type:'', threat_types:[], harassment_type:'',
+      physical_assault_type:'', characteristics:[], va_perpetrator:'',
+      va_known_offender:'', va_target:'',
+      areas:[], suspect_count:'', suspect_desc:'', known_offender:'', goods_desc:'',
+      outcome:'', police_ref:'', notes:''
+    };
+    document.querySelectorAll('.chip, .area-chip').forEach(c => c.classList.remove('selected'));
+    document.querySelectorAll('input[type=text], textarea').forEach(i => i.value = '');
+    document.getElementById('store_name').value = 'TK Maxx Cardiff Valegate 356';
+    document.getElementById('incident_datetime').value = dtDefault;
+    ['crime_section','theft_section','va_section','va_verbal_section',
+     'va_threats_section','va_harassment_section','va_physical_section'].forEach(id => {
+      document.getElementById(id).style.display = 'none';
+    });
+    showStep(1);
+  }
+
+  showStep(1);
+</script>
+</body>
+</html>
