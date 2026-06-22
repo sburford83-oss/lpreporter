@@ -14,7 +14,7 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ari
 .app{max-width:520px;margin:auto;min-height:100vh;padding:env(safe-area-inset-top) 16px 96px}
 .top{position:sticky;top:0;background:rgba(9,11,16,.92);backdrop-filter:blur(18px);z-index:10;padding:16px 0 12px;border-bottom:1px solid var(--line)}
 .brand{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
-.storeBox{display:grid;grid-template-columns:1fr;gap:6px;min-width:170px}
+.storeBox{display:grid;grid-template-columns:1fr;gap:6px;min-width:190px}
 .storeInputs{display:grid;grid-template-columns:1fr 70px;gap:6px}
 .miniInput{width:100%;background:#10141d;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:9px 10px;font-size:13px;font-weight:800}
 .miniLabel{font-size:11px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:right}
@@ -52,10 +52,40 @@ textarea{min-height:104px;resize:vertical}
 .small{font-size:13px}.hidden{display:none!important}
 .progress{height:8px;background:#202636;border-radius:999px;overflow:hidden;margin-top:14px}.bar{height:100%;width:10%;background:var(--red);transition:.2s}
 .listTitle{display:flex;align-items:center;justify-content:space-between;margin-top:18px}
-.danger{color:#ff6b6b}.ok{color:var(--green)}
-.bottomTabs{position:fixed;left:50%;transform:translateX(-50%);bottom:14px;width:min(488px,calc(100% - 28px));background:rgba(18,23,34,.92);backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.1);border-radius:24px;display:grid;grid-template-columns:repeat(4,1fr);padding:8px;box-shadow:0 18px 40px rgba(0,0,0,.35);z-index:50}
+.danger{color:#ff6b6b}.ok{color:var(--green)}.toast{position:fixed;left:50%;bottom:92px;transform:translateX(-50%) translateY(20px);background:#10141d;border:1px solid var(--line);color:#fff;padding:13px 16px;border-radius:18px;box-shadow:0 18px 40px rgba(0,0,0,.35);opacity:0;pointer-events:none;z-index:99;transition:.2s;font-weight:800}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}.btn[disabled]{opacity:.65;cursor:not-allowed}
+.twoTabs{grid-template-columns:repeat(2,1fr)!important}.hubLocked{background:#0f131c;border:1px solid var(--line);border-radius:20px;padding:18px;margin-top:14px}.bottomTabs{position:fixed;left:50%;transform:translateX(-50%);bottom:14px;width:min(488px,calc(100% - 28px));background:rgba(18,23,34,.92);backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.1);border-radius:24px;display:grid;grid-template-columns:repeat(2,1fr);padding:8px;box-shadow:0 18px 40px rgba(0,0,0,.35);z-index:50}
 .tab{border:0;background:transparent;color:var(--muted);padding:8px 4px;border-radius:16px;font-size:11px;font-weight:900}.tab.on{background:var(--red);color:#fff}
-.storeSelect{margin-top:8px}
+.storeSelect{margin-top:8px}.storeWarning{border-color:#ffb020!important;box-shadow:0 0 0 2px rgba(255,176,32,.15)}
+
+.dynamicHero{position:relative;overflow:hidden;background:linear-gradient(135deg,#191f2b 0%,#111722 46%,#350917 100%);border:1px solid rgba(255,255,255,.08);border-radius:28px;padding:22px;margin:20px 0 16px;box-shadow:0 22px 60px rgba(0,0,0,.42)}
+.dynamicHero:before{content:"";position:absolute;right:-45px;top:-55px;width:150px;height:150px;background:rgba(239,23,67,.35);border-radius:50%;filter:blur(10px);animation:floatGlow 4s ease-in-out infinite}
+.dynamicHero:after{content:"";position:absolute;left:-70px;bottom:-80px;width:180px;height:180px;background:rgba(77,163,255,.14);border-radius:50%;filter:blur(14px)}
+@keyframes floatGlow{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(12px) scale(1.08)}}
+.dynamicHero h2{position:relative;z-index:1;font-size:34px;margin:0 0 8px;letter-spacing:-1.5px}
+.dynamicHero p{position:relative;z-index:1;margin:0}
+.pulseCard{position:relative;overflow:hidden}
+.pulseCard:after{content:"";position:absolute;inset:auto -40% -55% -40%;height:70%;background:radial-gradient(circle,rgba(255,255,255,.12),transparent 62%);animation:shine 3.8s ease-in-out infinite}
+@keyframes shine{0%,100%{transform:translateX(-18%)}50%{transform:translateX(18%)}}
+.btn.big{transition:transform .15s ease, box-shadow .15s ease}
+.btn.big:active,.chip:active,.incident:active{transform:scale(.97)}
+.btn.red{box-shadow:0 16px 34px rgba(239,23,67,.32)}
+.btn.amber{box-shadow:0 16px 34px rgba(255,159,26,.28)}
+.liveStrip{display:flex;gap:8px;overflow:auto;padding:4px 0 12px;margin-top:4px;scrollbar-width:none}
+.liveStrip::-webkit-scrollbar{display:none}
+.liveTile{min-width:132px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:12px;box-shadow:0 12px 26px rgba(0,0,0,.18)}
+.liveTile b{display:block;font-size:20px;margin-bottom:3px}
+.incident{transition:transform .15s ease, border-color .15s ease;background:linear-gradient(145deg,#171d2a,#101620)}
+.incident:hover{border-color:#3a4560}
+.incident b{font-size:18px}
+.incident .small{line-height:1.45}
+.top{box-shadow:0 16px 44px rgba(0,0,0,.28)}
+.progress{height:9px}.bar{background:linear-gradient(90deg,#ef1743,#ff7a18)}
+.stat{position:relative;overflow:hidden}
+.stat:before{content:"";position:absolute;right:-30px;top:-30px;width:85px;height:85px;border-radius:50%;background:rgba(239,23,67,.13)}
+.statusBanner{display:none;margin-top:12px;padding:12px 14px;border-radius:16px;background:rgba(45,211,111,.10);border:1px solid rgba(45,211,111,.25);color:#a6ffc9;font-weight:800}
+.statusBanner.show{display:block;animation:fade .2s ease}
+.section h3{display:flex;align-items:center;gap:6px}
+
 </style>
 </head>
 <body>
@@ -68,45 +98,44 @@ textarea{min-height:104px;resize:vertical}
   </div>
   <div class="storeBox">
    <div class="miniLabel">Store</div>
-   <div class="storeInputs"><input id="storeName" class="miniInput" placeholder="Store name"><input id="storeNumber" class="miniInput" placeholder="No."></div>
+   <select id="storeDropdown" class="miniInput" onchange="selectStoreDropdown(this.value)">
+    <option value="">Select store...</option>
+    <option value="Valegate #356">Valegate #356</option>
+    <option value="Newport Road (NPR)">Newport Road (NPR)</option>
+    <option value="Newport">Newport</option>
+    <option value="Cwmbran">Cwmbran</option>
+    <option value="Llantrisant">Llantrisant</option>
+    <option value="Swansea">Swansea</option>
+    <option value="Llanelli">Llanelli</option>
+    <option value="Carmarthen">Carmarthen</option>
+    <option value="Haverford West (HFW)">Haverford West (HFW)</option>
+    <option value="Merthyr">Merthyr</option>
+    <option value="Cardiff">Cardiff</option>
+    <option value="Cardiff HomeSense">Cardiff HomeSense</option>
+   </select>
   </div>
  </div>
  <div class="progress"><div class="bar" id="bar"></div></div>
 </header>
 
-<section id="home" class="screen active">
- <div class="hero"><h2>Live district reporting</h2><p class="muted">All reports now save to Firebase so LP can see the same live hub.</p></div>
+<section id="home" class="screen">
+ <div class="dynamicHero"><h2>📋 LP Command Hub</h2><p class="muted">Live 24-hour incident picture across the district.</p><div id="hubStatus" class="statusBanner">🔥 Hub is live and listening</div></div><div class="liveStrip"><div class="liveTile"><b>🚨</b><span>Theft watch</span></div><div class="liveTile"><b>⚠️</b><span>Violence alerts</span></div><div class="liveTile"><b>🚗</b><span>Vehicle intel</span></div><div class="liveTile"><b>📍</b><span>Store activity</span></div></div>
  <div class="grid">
-  <div class="card stat"><span class="muted">Live Reports</span><b id="todayCount">0</b>Incidents</div>
-  <div class="card stat"><span class="muted">Known Value</span><b id="recoveredTotal">£0</b>District hub</div>
+  <div class="card stat pulseCard"><span class="muted">Live Reports</span><b id="todayCount">0</b>Incidents</div>
+  <div class="card stat pulseCard"><span class="muted">Known Value</span><b id="recoveredTotal">£0</b>District hub</div>
  </div>
  <div class="quick">
   <button class="btn big red" onclick="start('🚨 Theft')">🚨 Theft</button>
   <button class="btn big amber" onclick="start('⚠️ Violence')">⚠️ Violence</button>
  </div>
  <div class="section">
-  <h3>District store quick select</h3>
-  <select id="storeSelect" class="input storeSelect" onchange="selectDistrictStore(this.value)">
-   <option value="">Choose store...</option>
-   <option>Valegate #356</option>
-   <option>Newport Road (NPR)</option>
-   <option>Newport</option>
-   <option>Cwmbran</option>
-   <option>Llantrisant</option>
-   <option>Swansea</option>
-   <option>Llanelli</option>
-   <option>Carmarthen</option>
-   <option>Haverford West (HFW)</option>
-   <option>Merthyr</option>
-   <option>Cardiff</option>
-   <option>Cardiff HomeSense</option>
-  </select>
+  <div class="hubLocked"><b>🏪 Current store</b><p class="muted small" id="currentStoreText">Select your store from the dropdown at the top.</p></div>
  </div>
- <div class="listTitle"><h3>📋 Live Incidents</h3><button class="btn ghost small" onclick="renderRecent()">Refresh</button></div>
+ <div class="listTitle"><h3>🔥 Live Incidents - last 24hrs</h3><button class="btn ghost small" onclick="renderRecent()">Refresh</button></div>
  <div id="recent"><p class="muted">Connecting to Firebase...</p></div>
 </section>
 
-<section id="type" class="screen"><div class="hero"><h2>What happened?</h2><p class="muted">Keep it simple. Pick one.</p></div><div class="grid"><button class="btn big red" onclick="start('🚨 Theft')">🚨 Theft</button><button class="btn big amber" onclick="start('⚠️ Violence')">⚠️ Violence</button></div><div class="nav"><button class="btn ghost" onclick="show('home')">← Back</button><button class="btn red" onclick="show('location')">Next →</button></div></section>
+<section id="type" class="screen active"><div class="dynamicHero"><h2>🚨 Report Fast</h2><p class="muted">Two taps to start. Detail only where it matters.</p></div><div class="grid"><button class="btn big red" onclick="start('🚨 Theft')">🚨 Theft</button><button class="btn big amber" onclick="start('⚠️ Violence')">⚠️ Violence</button></div><div class="section"><div class="hubLocked"><b>📋 Hub access</b><p class="muted small">LP can open the Hub using passcode 9999.</p><button class="btn ghost" onclick="unlockHub()">Open Hub</button></div></div></section>
 
 <section id="location" class="screen"><div class="hero"><h2>📍 Where?</h2><p class="muted">Select all areas involved.</p></div><div class="grid" id="locations"></div><div class="nav"><button class="btn ghost" onclick="show('type')">← Back</button><button class="btn red" onclick="show('suspect')">Next →</button></div></section>
 
@@ -130,17 +159,16 @@ textarea{min-height:104px;resize:vertical}
 
 <section id="outcome" class="screen"><div class="hero"><h2>⚖️ Outcome</h2><p class="muted">Select all that apply.</p></div><div class="grid" id="outcomes"></div><div class="section"><h3>Police Reference</h3><input class="input" id="policeRef" placeholder="If applicable"></div><div class="nav"><button class="btn ghost" onclick="show('evidence')">← Back</button><button class="btn red" onclick="review()">Review →</button></div></section>
 
-<section id="review" class="screen"><div class="hero"><h2>✅ Review</h2><p class="muted">Copy, email or submit live to Firebase.</p></div><div class="summary" id="summary"></div><br><div class="grid"><button class="btn" onclick="copySummary()">📋 Copy</button><button class="btn" onclick="emailSummary()">📧 Email</button></div><br><button class="btn big red" onclick="saveIncident()">🔥 Submit Live</button><div class="nav"><button class="btn ghost" onclick="show('outcome')">← Back</button><button class="btn red" onclick="show('home')">Home</button></div></section>
+<section id="review" class="screen"><div class="hero"><h2>✅ Review</h2><p class="muted">Copy, email or submit live to Firebase.</p></div><div class="summary" id="summary"></div><br><div class="grid"><button class="btn" onclick="copySummary()">📋 Copy</button><button class="btn" onclick="emailSummary()">📧 Email</button></div><br><button id="submitBtn" class="btn big red" onclick="saveIncident()">🔥 Submit Live</button><div class="nav"><button class="btn ghost" onclick="show('outcome')">← Back</button><button class="btn red" onclick="show('home')">Home</button></div></section>
 
 <section id="detail" class="screen"><div class="hero"><h2 id="detailTitle">Incident</h2><p class="muted" id="detailSub"></p></div><div class="summary" id="detailBody"></div><br><div class="grid"><button class="btn" onclick="copyText(detailText)">📋 Copy</button><button class="btn" onclick="emailText(detailText)">📧 Email</button></div><div class="nav"><button class="btn ghost" onclick="show('home')">← Back</button><button class="btn red" onclick="show('type')">New</button></div></section>
 </div>
 
-<nav class="bottomTabs">
- <button class="tab on" onclick="show('home')">📋<br>Hub</button>
- <button class="tab" onclick="show('type')">🚨<br>Report</button>
- <button class="tab" onclick="show('home')">🔥<br>Live</button>
- <button class="tab" onclick="show('home')">📊<br>Stats</button>
+<nav class="bottomTabs twoTabs">
+ <button class="tab on" onclick="show('type')">🚨<br>Report</button>
+ <button class="tab" onclick="unlockHub()">📋<br>Hub</button>
 </nav>
+<div id="toast" class="toast">✅ Sent</div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
@@ -156,31 +184,79 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-let data={},currentDetail=null,detailText='',liveIncidents=[];
+let data={},currentDetail=null,detailText='',liveIncidents=[],hubUnlocked=false;
 const sets={locations:['💍 Jewellery','👜 Accessories','💄 Beauty','👗 Womenswear','👔 Menswear','🧸 Kids','🏠 Home','👟 Footwear','🛒 Frontline','🌍 External'],gender:['👨 Male','👩 Female','❓ Unknown'],age:['🧒 U18','🧑 18-25','👨 26-35','🧔 36-45','👴 46+','❓ Unknown'],ethnicity:['⚪ White','⚫ Black','🟤 Asian','🟫 South Asian','🟨 Middle Eastern','🟧 Mixed Race','❓ Unknown'],build:['🏃 Slim','🚶 Medium','🏋️ Stocky','🦍 Large'],height:['⬇️ Short','➡️ Medium','⬆️ Tall'],hairColour:['⚫ Black','🟤 Brown','🟡 Blonde','⚪ Grey','🔴 Red','🎨 Dyed','🦲 Bald','❓ Unknown'],hairStyle:['✂️ Short','📏 Long','〰️ Curly','🪢 Braids','🐴 Ponytail','❓ Unknown'],topType:['👕 T-Shirt','🧥 Hoodie','🥼 Jacket','🧣 Coat','👔 Shirt','🏃 Tracksuit'],topColour:['⚫ Black','⚪ White','🩶 Grey','🔵 Blue','🔴 Red','🟢 Green','🟡 Yellow','🟠 Orange','🟤 Brown'],bottomType:['👖 Jeans','🏃 Tracksuit','🩳 Shorts','👔 Smart','🧘 Leggings','👗 Skirt'],bottomColour:['⚫ Black','⚪ White','🩶 Grey','🔵 Blue','🔴 Red','🟢 Green','🟡 Yellow','🟠 Orange','🟤 Brown'],footwear:['👟 Trainers','🥾 Boots','👞 Shoes','🩴 Sandals','❓ Unknown'],shoeColour:['⚫ Black','⚪ White','🩶 Grey','🔵 Blue','🔴 Red','🟤 Brown'],features:['🧢 Cap','🕶️ Glasses','😷 Mask','🧔 Beard','✍️ Tattoo','🎒 Bag','👶 Pushchair','🪖 Hood up','🩼 Walking aid','❓ None/Unknown'],vehicleType:['🚗 Car','🚐 Van','🏍️ Bike','🚕 Taxi','🚚 Lorry','❓ Unknown'],vehicleColour:['⚫ Black','⚪ White','🩶 Grey','🔵 Blue','🔴 Red','🟢 Green','🟤 Brown','❓ Unknown'],goodsDept:['💄 Beauty','👜 Accessories','💍 Jewellery','👗 Womenswear','👔 Menswear','🧸 Kids','🏠 Home','👟 Footwear'],cctv:['📹 Full','🎥 Partial','❌ None'],witnesses:['👤 Associate','👥 Customer','❌ None'],outcomes:['✅ Deterral','📦 Goods recovered','🚔 Police called','🔒 Arrest made','⛔ Banned','❌ Lost']};
 const multi=new Set(['locations','features','outcomes']);
 
 function init(){
-  document.getElementById('storeName').value=localStorage.lpStoreName||'';
-  document.getElementById('storeNumber').value=localStorage.lpStoreNumber||'';
-  ['storeName','storeNumber'].forEach(id=>document.getElementById(id).addEventListener('input',saveStore));
+  const savedStore=localStorage.lpStore||'';
+  const dd=document.getElementById('storeDropdown');
+  if(dd) dd.value=savedStore;
+  updateStoreDisplay();
   Object.keys(sets).forEach(k=>{let el=document.getElementById(k);if(!el)return;sets[k].forEach(v=>{let b=document.createElement('button');b.className='chip';b.textContent=v;b.onclick=()=>pick(k,v,b);el.appendChild(b)})});
   listenLive();
 }
 function listenLive(){
   db.collection('incidents').orderBy('createdAt','desc').limit(50).onSnapshot(snapshot=>{
-    liveIncidents=snapshot.docs.map(doc=>({id:doc.id,...doc.data()}));
+    const cutoff=Date.now()-(24*60*60*1000);
+    liveIncidents=snapshot.docs.map(doc=>({id:doc.id,...doc.data()})).filter(item=>{
+      const d=item.createdAt&&item.createdAt.toDate?item.createdAt.toDate():new Date(item.createdAtLocal||item.date||0);
+      return d && d.getTime && d.getTime()>=cutoff;
+    });
+    if(hubUnlocked){
+      snapshot.docs.forEach(doc=>{
+        const item=doc.data();
+        const d=item.createdAt&&item.createdAt.toDate?item.createdAt.toDate():new Date(item.createdAtLocal||item.date||0);
+        if(d && d.getTime && d.getTime()<cutoff){ db.collection('incidents').doc(doc.id).delete().catch(()=>{}); }
+      });
+    }
     renderRecent();
+    const hs=document.getElementById('hubStatus'); if(hs) hs.classList.add('show');
   },err=>{
     document.getElementById('recent').innerHTML='<p class="danger">Firebase connection error: '+err.message+'</p>';
   });
 }
-function saveStore(){localStorage.lpStoreName=document.getElementById('storeName').value.trim();localStorage.lpStoreNumber=document.getElementById('storeNumber').value.trim()}
-function selectDistrictStore(v){if(!v)return;let parts=v.match(/^(.*?)(?:\s#(.+))?$/);document.getElementById('storeName').value=(parts&&parts[1])?parts[1]:v;document.getElementById('storeNumber').value=(parts&&parts[2])?parts[2]:'';saveStore()}
-function storeLabel(){let n=document.getElementById('storeName').value.trim();let no=document.getElementById('storeNumber').value.trim();return [n,no?('#'+no):''].filter(Boolean).join(' ')||'Store not entered'}
+function saveStore(){localStorage.lpStore=(document.getElementById('storeDropdown')?.value||'').trim();updateStoreDisplay()}
+function selectStoreDropdown(v){localStorage.lpStore=(v||'').trim();updateStoreDisplay()}
+function selectDistrictStore(v){selectStoreDropdown(v)}
+function updateStoreDisplay(){
+  const store=localStorage.lpStore||'';
+  const txt=document.getElementById('currentStoreText');
+  const dd=document.getElementById('storeDropdown');
+  if(txt) txt.textContent=store ? 'Reports will submit as: '+store : 'Select your store from the dropdown at the top.';
+  if(dd) dd.classList.toggle('storeWarning',!store);
+}
+function storeLabel(){return (localStorage.lpStore||document.getElementById('storeDropdown')?.value||'Store not selected').trim()}
 function resetChips(){document.querySelectorAll('.selected').forEach(x=>x.classList.remove('selected'));['suspectNotes','goodsDesc','value','evidenceNotes','policeRef','reg','make','direction'].forEach(id=>{let el=document.getElementById(id); if(el) el.value=''});document.getElementById('vehicleForm').classList.add('hidden')}
-function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0);let order=['home','type','location','suspect','vehicle','goods','evidence','outcome','review'];document.getElementById('bar').style.width=((Math.max(1,order.indexOf(id)+1)/order.length)*100)+'%';document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));if(id==='home')document.querySelector('.tab').classList.add('on')}
-function start(type){saveStore();resetChips();data={type,date:new Date().toLocaleString('en-GB'),store:storeLabel()};show('location')}
+function show(id){
+  if(id==='home' && !hubUnlocked){unlockHub();return}
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+  let order=['type','location','suspect','vehicle','goods','evidence','outcome','review','home'];
+  document.getElementById('bar').style.width=((Math.max(1,order.indexOf(id)+1)/order.length)*100)+'%';
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  if(id==='home')document.querySelectorAll('.tab')[1].classList.add('on');
+  else document.querySelectorAll('.tab')[0].classList.add('on');
+}
+function unlockHub(){
+  if(hubUnlocked){show('home');return}
+  const code=prompt('Enter LP Hub passcode');
+  if(code==='9999'){hubUnlocked=true;show('home')}
+  else if(code!==null){alert('Incorrect passcode')}
+}
+function start(type){
+  saveStore();
+  if(!localStorage.lpStore){
+    toast('🏪 Select store first');
+    const dd=document.getElementById('storeDropdown');
+    if(dd){dd.focus();dd.classList.add('storeWarning')}
+    return;
+  }
+  resetChips();
+  data={type,date:new Date().toLocaleString('en-GB'),store:storeLabel()};
+  show('location')
+}
 function pick(k,v,b){if(multi.has(k)){data[k]=data[k]||[]; if(data[k].includes(v)){data[k]=data[k].filter(x=>x!==v);b.classList.remove('selected')}else{data[k].push(v);b.classList.add('selected')}}else{data[k]=v;[...b.parentNode.children].forEach(x=>x.classList.remove('selected'));b.classList.add('selected')}}
 function setVehicle(yes){data.vehicleSeen=yes?'✅ Vehicle seen':'❌ No vehicle';document.getElementById('vehicleForm').classList.toggle('hidden',!yes)}
 function clean(x){return (x||'').toString().replace(/^[^\w£]+\s?/,'')}
@@ -188,12 +264,24 @@ function buildSummary(){data.suspectNotes=document.getElementById('suspectNotes'
 function review(){let s=buildSummary();document.getElementById('summary').textContent=s;show('review')}
 async function saveIncident(){
   let s=buildSummary();
+  const btn=document.getElementById('submitBtn');
+  const original=btn ? btn.textContent : '';
+  if(btn){btn.disabled=true;btn.textContent='🔥 Sending to Live Hub...'}
+  toast('🔥 Sending to Live Hub...'); if(btn){btn.style.transform='scale(.98)'}
   let payload={...data,summary:s,status:'Open',createdAt:firebase.firestore.FieldValue.serverTimestamp(),createdAtLocal:new Date().toISOString(),valueNumber:parseFloat(data.value)||0};
   try{
     await db.collection('incidents').add(payload);
-    alert('Submitted live to Firebase ✅');
-    show('home');
+    toast('✅ Sent to Live Hub');
+    if(btn){btn.textContent='✅ Sent';btn.style.transform='scale(1)'}
+    setTimeout(()=>{
+      if(btn){btn.disabled=false;btn.textContent=original}
+      show('type');
+      resetChips();
+      data={};
+    },650);
   }catch(err){
+    if(btn){btn.disabled=false;btn.textContent=original}
+    toast('❌ Could not send');
     alert('Could not submit to Firebase: '+err.message);
   }
 }
@@ -203,11 +291,11 @@ function renderRecent(){
   let total=arr.reduce((a,i)=>a+(parseFloat(i.valueNumber||i.value)||0),0);
   document.getElementById('recoveredTotal').textContent='£'+total.toFixed(0);
   let box=document.getElementById('recent');
-  box.innerHTML=arr.length?'':'<p class="muted">No live incidents yet.</p>';
+  box.innerHTML=arr.length?'':'<p class="muted">No live incidents yet — calm seas, for now.</p>';
   arr.forEach(i=>{
     let d=document.createElement('div');d.className='incident';d.onclick=()=>openDetail(i.id);
     let dt=i.createdAt&&i.createdAt.toDate?i.createdAt.toDate().toLocaleString('en-GB'):(i.date||'');
-    d.innerHTML=`<div class="row"><b>${i.type||'🚨 Incident'}</b><span class="muted small">${dt}</span></div><div class="small muted">🏪 ${i.store||'-'} &nbsp; 📍 ${(i.locations||[]).join(', ')||'-'} &nbsp; 👤 ${clean(i.gender)||'-'} ${clean(i.age)||''} &nbsp; 💷 ${i.value?'£'+i.value:'-'}</div><div class="small muted">🚗 ${i.vehicleSeen||'No vehicle'} &nbsp; 📹 ${i.cctv||'-'} &nbsp; ⚖️ ${(i.outcomes||[]).slice(0,2).join(', ')||'-'}</div>`;
+    d.innerHTML=`<div class="row"><b>${i.type||'🚨 Incident'}</b><span class="muted small">🕒 ${dt}</span></div><div class="small muted">🏪 ${i.store||'-'} &nbsp; 📍 ${(i.locations||[]).join(', ')||'-'}</div><div class="small muted">👤 ${clean(i.gender)||'-'} ${clean(i.age)||''} &nbsp; 💷 ${i.value?'£'+i.value:'-'} &nbsp; 🚗 ${i.vehicleSeen||'No vehicle'}</div><div class="small muted">📹 ${i.cctv||'-'} &nbsp; ⚖️ ${(i.outcomes||[]).slice(0,2).join(', ')||'-'}</div>`;
     box.appendChild(d)
   })
 }
@@ -216,6 +304,14 @@ function copySummary(){copyText(document.getElementById('summary').textContent)}
 function copyText(t){navigator.clipboard?.writeText(t);alert('Copied ✅')}
 function emailSummary(){emailText(document.getElementById('summary').textContent)}
 function emailText(t){location.href='mailto:?subject=LP Incident Report&body='+encodeURIComponent(t)}
+function toast(msg){
+  const t=document.getElementById('toast');
+  if(!t)return;
+  t.textContent=msg;
+  t.classList.add('show');
+  clearTimeout(window.toastTimer);
+  window.toastTimer=setTimeout(()=>t.classList.remove('show'),2200);
+}
 init();
 </script>
 </body>
