@@ -119,7 +119,7 @@ textarea{min-height:104px;resize:vertical}
 </header>
 
 <section id="home" class="screen">
- <div class="dynamicHero"><h2>📋 LP Command Hub</h2><p class="muted">Live 24-hour incident picture across the district.</p><div id="hubStatus" class="statusBanner">🔥 Hub is live and listening</div></div><div class="liveStrip"><div class="liveTile"><b>🚨</b><span>Theft watch</span></div><div class="liveTile"><b>⚠️</b><span>Violence alerts</span></div><div class="liveTile"><b>🚗</b><span>Vehicle intel</span></div><div class="liveTile"><b>📍</b><span>Store activity</span></div></div>
+ <div class="dynamicHero"><h2>📋 LP Command Hub</h2><p class="muted">Live 24-hour incident picture across the district.</p><div id="hubStatus" class="statusBanner">🔥 Hub is live and listening</div></div>
  <div class="grid">
   <div class="card stat pulseCard"><span class="muted">Live Reports</span><b id="todayCount">0</b>Incidents</div>
   <div class="card stat pulseCard"><span class="muted">Known Value</span><b id="recoveredTotal">£0</b>District hub</div>
@@ -131,7 +131,14 @@ textarea{min-height:104px;resize:vertical}
  <div class="section">
   <div class="hubLocked"><b>🏪 Current store</b><p class="muted small" id="currentStoreText">Select your store from the dropdown at the top.</p></div>
  </div>
- <div class="listTitle"><h3>🔥 Live Incidents - last 24hrs</h3><button class="btn ghost small" onclick="renderRecent()">Refresh</button></div>
+ <div class="listTitle">
+  <h3>🔥 Live Incidents - last 24hrs</h3>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+    <button class="btn ghost small" onclick="renderRecent()">Refresh</button>
+    <button class="btn ghost small" onclick="deleteLastIncident()">↩️ Remove Last</button>
+    <button class="btn ghost small" onclick="clearAllIncidents()">🗑️ Clear Hub</button>
+  </div>
+ </div>
  <div id="recent"><p class="muted">Connecting to Firebase...</p></div>
 </section>
 
@@ -312,9 +319,39 @@ function toast(msg){
   clearTimeout(window.toastTimer);
   window.toastTimer=setTimeout(()=>t.classList.remove('show'),2200);
 }
+async function deleteLastIncident(){
+  const code = prompt("Manager Passcode");
+
+  if(code !== "9999"){
+    alert("Incorrect passcode");
+    return;
+  }
+
+  if(!confirm("Remove the most recent live incident?")){
+    return;
+  }
+
+  try{
+    const snapshot = await db
+      .collection("incidents")
+      .orderBy("createdAt","desc")
+      .limit(1)
+      .get();
+
+    if(snapshot.empty){
+      alert("No incidents found");
+      return;
+    }
+
+    await snapshot.docs[0].ref.delete();
+    toast("↩️ Last incident removed");
+
+  } catch(err){
+    alert("Error: " + err.message);
+  }
+}
 
 async function clearAllIncidents(){
-
   const code = prompt("Manager Passcode");
 
   if(code !== "9999"){
@@ -329,11 +366,16 @@ async function clearAllIncidents(){
   try{
     const snapshot = await db.collection("incidents").get();
 
+    if(snapshot.empty){
+      toast("No incidents to clear");
+      return;
+    }
+
     for(const doc of snapshot.docs){
       await doc.ref.delete();
     }
 
-    alert("LP Hub cleared successfully");
+    toast("🗑️ LP Hub cleared");
 
   } catch(err){
     alert("Error: " + err.message);
