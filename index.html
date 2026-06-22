@@ -312,6 +312,34 @@ function toast(msg){
   clearTimeout(window.toastTimer);
   window.toastTimer=setTimeout(()=>t.classList.remove('show'),2200);
 }
+
+async function clearAllIncidents(){
+
+  const code = prompt("Manager Passcode");
+
+  if(code !== "9999"){
+    alert("Incorrect passcode");
+    return;
+  }
+
+  if(!confirm("Delete ALL incidents from LP Hub?")){
+    return;
+  }
+
+  try{
+    const snapshot = await db.collection("incidents").get();
+
+    for(const doc of snapshot.docs){
+      await doc.ref.delete();
+    }
+
+    alert("LP Hub cleared successfully");
+
+  } catch(err){
+    alert("Error: " + err.message);
+  }
+}
+
 init();
 </script>
 </body>
