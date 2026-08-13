@@ -64,6 +64,12 @@ textarea{min-height:88px;resize:vertical}.row{display:grid;grid-template-columns
 .toolbar{display:flex;flex-wrap:wrap;gap:8px}.small-btn{border:1px solid var(--line);background:#fff;border-radius:14px;padding:10px 12px;font-weight:850;color:var(--ink)}
 .danger{background:#fff0f2;color:#b4233c;border-color:#ffd3da}.toast{position:fixed;left:50%;bottom:92px;transform:translateX(-50%) translateY(20px);opacity:0;background:#172033;color:#fff;padding:11px 14px;border-radius:999px;font-weight:900;z-index:60;transition:.2s}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 @media(max-width:560px){.top{align-items:flex-start}.store-pill{max-width:145px}.row{grid-template-columns:1fr}}
+
+    .incident-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+    .incident-actions button{flex:1;min-width:130px;border:0;border-radius:14px;padding:11px 12px;font-weight:800;cursor:pointer}
+    .copy-btn{background:rgba(102,166,255,.16);color:#dbeaff;border:1px solid rgba(102,166,255,.28)!important}
+    .email-btn{background:rgba(35,209,139,.15);color:#d9fff0;border:1px solid rgba(35,209,139,.28)!important}
+    
 </style>
 </head>
 <body>
@@ -239,7 +245,60 @@ function collect(){
 function saveIncident(){collect();if(!current.type){toast('🚨 Select incident type');return}incidents.unshift(current);save();toast('✅ Incident saved');openScreen('home',document.querySelector('.nav button'))}
 function clearForm(){['reg','goodsDesc','goodsValue','evidenceNotes'].forEach(id=>{if($(id))$(id).value=''});if($('occupants'))$('occupants').value='';if($('goodsRecovered'))$('goodsRecovered').value='No'}
 function suspectText(i){let s=i.suspect;return [s.gender,s.age,s.ethnicity].filter(Boolean).join(' ')||'No suspect description'}
-function card(i){return `<div class="incident"><div class="incident-top"><b>${i.type.includes('Violence')?'⚠️':'🚨'} ${i.type||'Incident'}</b><span class="tag">${i.id}</span></div><div class="meta">🏪 ${i.store} · 🕒 ${new Date(i.created).toLocaleString()}</div><div class="meta">📍 ${i.locations.join(', ')||'No location'} · 👤 ${suspectText(i)}${i.vehicle.reg?' · 🚗 '+i.vehicle.reg:''}</div></div>`}
+function card(i){
+  return `<div class="incident">
+    <div class="incident-top">
+      <b>${i.type||'Incident'}</b>
+      <span class="tag">${i.id}</span>
+    </div>
+    <div class="sub">${new Date(i.created).toLocaleString()} • ${(i.locations||[]).join(', ')||i.store}</div>
+    <div style="margin-top:8px;color:var(--muted);font-size:13px">
+      ${suspectFor(i)} ${i.vehicle&&i.vehicle.reg?' • 🚗 '+i.vehicle.reg:''}
+    </div>
+    <div class="incident-actions">
+      <button class="copy-btn" onclick="event.stopPropagation();copyIncident('${i.id}')">📋 Copy all</button>
+      <button class="email-btn" onclick="event.stopPropagation();emailIncident('${i.id}')">📧 Email</button>
+    </div>
+  </div>`}
+
+function incidentSummary(i){
+  if(!i) return '';
+  let g=i.goods||{}, e=i.evidence||{}, o=(i.outcome||[]).join(', ')||'Outcome not recorded';
+  let s=i.suspect||{}, suspect=[s.gender,s.age,s.ethnicity].filter(Boolean).join(' ')||'No suspect description';
+  let v=i.vehicle||{};
+  let vehicle=v.seen==='Yes'
+    ? `Vehicle: ${[v.colour,v.make,v.type].filter(Boolean).join(' ')||'vehicle'}${v.reg?' registration '+v.reg:''}${v.occupants?' with '+v.occupants+' occupant(s)':''}${v.direction?' travelled '+v.direction.toLowerCase():''}.`
+    : 'No vehicle recorded.';
+  return `${i.id}
+Store: ${i.store}
+Date/time: ${new Date(i.created).toLocaleString()}
+Incident type: ${i.type||'Not recorded'}
+Location: ${(i.locations||[]).join(', ')||'Not recorded'}
+
+Suspect: ${suspect}
+
+Goods: ${g.description||'Not recorded'}${g.department?' from '+g.department:''}${g.value?' valued at approximately £'+g.value:''}. Recovered: ${g.recovered||'Not recorded'}.
+
+${vehicle}
+
+Evidence: CCTV ${e.cctv||'not recorded'}. Witnesses: ${(e.witnesses||[]).join(', ')||'not recorded'}. ${e.notes||''}
+
+Outcome: ${o}.`;
+}
+
+function copyIncident(id){
+  const i=incidents.find(x=>x.id===id);
+  if(!i) return;
+  navigator.clipboard.writeText(incidentSummary(i));
+  toast('Incident copied');
+}
+
+function emailIncident(id){
+  const i=incidents.find(x=>x.id===id);
+  if(!i) return;
+  location.href=`mailto:?subject=${encodeURIComponent('LP Incident '+i.id)}&body=${encodeURIComponent(incidentSummary(i))}`;
+}
+
 function renderAll(){
  $('storeLine').textContent='🏪 '+(localStorage.lpStore||'Valegate');let today=new Date().toDateString(),todays=incidents.filter(i=>new Date(i.created).toDateString()===today);
  $('todayCount').textContent=todays.length;$('recoveryTotal').textContent='£'+todays.reduce((a,i)=>a+(i.goods.recovered==='Yes'?Number(i.goods.value||0):0),0);$('deterralCount').textContent=todays.filter(i=>i.outcome.includes('Deterral')).length;$('policeCount').textContent=todays.filter(i=>i.outcome.includes('Police called')).length;
