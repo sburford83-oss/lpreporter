@@ -161,7 +161,8 @@ textarea{min-height:88px;resize:vertical}.row{display:grid;grid-template-columns
 
  <details class="sec-green" open><summary><span class="section-icon">⚖️</span>Outcome</summary><div class="detail-body"><div id="outcomeChips" class="chips"></div></details>
 
- <div class="submit-wrap"><button class="submit" onclick="saveIncident()">💾 Save Incident</button></div>
+ <div class="panel share-panel"><h3>📤 Share this report</h3><div class="bar"><button class="secondary" onclick="copyCurrentReport()">📋 Copy All</button><button class="secondary" onclick="emailCurrentReport()">📧 Email All</button></div><div class="sub" style="margin-top:9px">Includes every option you have selected or entered above.</div></div>
+<div class="submit-wrap"><button class="submit" onclick="saveIncident()">💾 Save Incident</button></div>
 </section>
 
 <section id="dashboard" class="screen">
@@ -211,7 +212,7 @@ const opt={
  features:[['✍️','Tattoo'],['🧣','Neck tattoo'],['🙂','Face tattoo'],['➖','Scar'],['💎','Piercing'],['👓','Glasses'],['😷','Mask'],['🦷','Gold teeth'],['🦯','Walking stick'],['🚶','Limp'],['🧢','Hat/cap'],['🎒','Backpack'],['👜','Handbag']],
  vehSeen:[['✅','Yes'],['❌','No']],vehType:[['🚗','Car'],['🚐','Van'],['🏍️','Motorbike'],['🚕','Taxi'],['🚚','Lorry'],['❓','Unknown']],
  vehMake:[['🚘','Ford'],['🚘','Vauxhall'],['🚘','BMW'],['🚘','Audi'],['🚘','Mercedes'],['🚘','Volkswagen'],['🚘','Nissan'],['🚘','Toyota'],['🚘','Honda'],['🚘','Kia'],['🚘','Hyundai'],['➕','Other'],['❓','Unknown']],
- direction:[['⬅️','Left'],['➡️','Right'],['⬆️','Straight ahead'],['🛍️','Towards retail park'],['🛣️','Towards Newport Road'],['❓','Unknown']],
+ direction:[['⬅️','Left'],['➡️','Right'],['⬆️','Straight ahead'],['🛍️','Towards retail park'],['❓','Unknown']],
  cctv:[['📹','Full coverage'],['🎥','Partial coverage'],['❌','No coverage'],['❓','Unknown']],
  witness:[['👤','Associate witness'],['👥','Customer witness'],['❌','None']],
  outcome:[['✅','Deterral'],['📦','Goods recovered'],['🚔','Police called'],['⛔','Ban issued'],['🔒','Arrest made'],['❌','Not recovered'],['📝','Resolver submitted']]
@@ -242,7 +243,34 @@ function collect(){
  current.store=localStorage.lpStore||'Valegate';current.vehicle.reg=$('reg').value.toUpperCase();current.vehicle.occupants=$('occupants').value;
  current.goods.department=$('goodsDept').value;current.goods.description=$('goodsDesc').value;current.goods.value=$('goodsValue').value;current.goods.recovered=$('goodsRecovered').value;current.evidence.notes=$('evidenceNotes').value;
 }
-function saveIncident(){collect();if(!current.type){toast('🚨 Select incident type');return}incidents.unshift(current);save();toast('✅ Incident saved');openScreen('home',document.querySelector('.nav button'))}
+async function copyCurrentReport(){
+ collect();
+ const full=incidentSummary(current);
+ try{await navigator.clipboard.writeText(full)}
+ catch(e){const ta=document.createElement('textarea');ta.value=full;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove()}
+ toast('📋 All selected information copied');
+}
+function emailCurrentReport(){
+ collect();
+ const full=incidentSummary(current);
+ location.href=`mailto:?subject=${encodeURIComponent('LP Incident '+current.id)}&body=${encodeURIComponent(full)}`;
+}
+function saveIncident(){
+ collect();
+ if(!current.type){toast('🚨 Select incident type');return}
+ try{
+   incidents.unshift(JSON.parse(JSON.stringify(current)));
+   save();
+   toast('✅ Incident saved');
+   current=blank();
+   clearForm();
+   renderForm();
+   openScreen('home',document.querySelector('.nav button'));
+ }catch(err){
+   console.error(err);
+   alert('Could not save incident. Please try again.');
+ }
+}
 function clearForm(){['reg','goodsDesc','goodsValue','evidenceNotes'].forEach(id=>{if($(id))$(id).value=''});if($('occupants'))$('occupants').value='';if($('goodsRecovered'))$('goodsRecovered').value='No'}
 function suspectText(i){let s=i.suspect;return [s.gender,s.age,s.ethnicity].filter(Boolean).join(' ')||'No suspect description'}
 function card(i){
@@ -253,7 +281,7 @@ function card(i){
     </div>
     <div class="sub">${new Date(i.created).toLocaleString()} • ${(i.locations||[]).join(', ')||i.store}</div>
     <div style="margin-top:8px;color:var(--muted);font-size:13px">
-      ${suspectFor(i)} ${i.vehicle&&i.vehicle.reg?' • 🚗 '+i.vehicle.reg:''}
+      ${suspectText(i)} ${i.vehicle&&i.vehicle.reg?' • 🚗 '+i.vehicle.reg:''}
     </div>
     <div class="incident-actions">
       <button class="copy-btn" onclick="event.stopPropagation();copyIncident('${i.id}')">📋 Copy all</button>
@@ -262,28 +290,43 @@ function card(i){
   </div>`}
 
 function incidentSummary(i){
-  if(!i) return '';
-  let g=i.goods||{}, e=i.evidence||{}, o=(i.outcome||[]).join(', ')||'Outcome not recorded';
-  let s=i.suspect||{}, suspect=[s.gender,s.age,s.ethnicity].filter(Boolean).join(' ')||'No suspect description';
-  let v=i.vehicle||{};
-  let vehicle=v.seen==='Yes'
-    ? `Vehicle: ${[v.colour,v.make,v.type].filter(Boolean).join(' ')||'vehicle'}${v.reg?' registration '+v.reg:''}${v.occupants?' with '+v.occupants+' occupant(s)':''}${v.direction?' travelled '+v.direction.toLowerCase():''}.`
-    : 'No vehicle recorded.';
-  return `${i.id}
-Store: ${i.store}
-Date/time: ${new Date(i.created).toLocaleString()}
-Incident type: ${i.type||'Not recorded'}
-Location: ${(i.locations||[]).join(', ')||'Not recorded'}
-
-Suspect: ${suspect}
-
-Goods: ${g.description||'Not recorded'}${g.department?' from '+g.department:''}${g.value?' valued at approximately £'+g.value:''}. Recovered: ${g.recovered||'Not recorded'}.
-
-${vehicle}
-
-Evidence: CCTV ${e.cctv||'not recorded'}. Witnesses: ${(e.witnesses||[]).join(', ')||'not recorded'}. ${e.notes||''}
-
-Outcome: ${o}.`;
+  if(!i)return '';
+  let s=i.suspect||{},v=i.vehicle||{},g=i.goods||{},e=i.evidence||{};
+  const line=(label,value)=>{
+    if(Array.isArray(value))return value.length?`${label}: ${value.join(', ')}`:'';
+    return value!==''&&value!==undefined&&value!==null?`${label}: ${value}`:'';
+  };
+  return [
+    '🚨 LP INCIDENT REPORT',
+    `Incident ID: ${i.id}`,
+    `🏪 Store: ${i.store||'Valegate'}`,
+    `🕒 Date/time: ${new Date(i.created).toLocaleString()}`,
+    `🚨 Incident type: ${i.type||'Not recorded'}`,
+    `📍 Location: ${(i.locations||[]).join(', ')||'Not recorded'}`,
+    '',
+    '👤 SUSPECT',
+    line('Gender',s.gender),line('Age range',s.age),line('Ethnicity / appearance',s.ethnicity),
+    line('Skin tone',s.skin),line('Build',s.build),line('Height',s.height),
+    line('Hair colour',s.hairColour),line('Hair style / length',s.hairStyle),line('Facial hair',s.facial),
+    line('Top',[s.topColour,s.top].filter(Boolean).join(' ')),
+    line('Bottoms',[s.bottomColour,s.bottom].filter(Boolean).join(' ')),
+    line('Footwear',[s.footColour,s.footwear].filter(Boolean).join(' ')),
+    line('Distinguishing features',s.features),
+    '',
+    '🚗 VEHICLE',
+    line('Vehicle seen',v.seen),line('Registration',v.reg),line('Type',v.type),line('Colour',v.colour),
+    line('Make',v.make),line('Occupants',v.occupants),line('Direction travelled',v.direction),
+    '',
+    '📦 GOODS',
+    line('Department',g.department),line('Description',g.description),
+    line('Estimated value',g.value?`£${g.value}`:''),line('Recovered',g.recovered),
+    '',
+    '📹 EVIDENCE',
+    line('CCTV',e.cctv),line('Witnesses',e.witnesses),line('Additional notes',e.notes),
+    '',
+    '⚖️ OUTCOME',
+    (i.outcome||[]).length?i.outcome.join(', '):'Not recorded'
+  ].filter(x=>x!==''&&x!==undefined).join('\n');
 }
 
 function copyIncident(id){
